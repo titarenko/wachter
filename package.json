@@ -1,0 +1,25 @@
+{
+  "name": "mylog",
+  "version": "0.1.0",
+  "description": "My preferred way of logging, with caller info, colors and other stuff.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/titarenko/mylog.git"
+  },
+  "keywords": [
+    "log",
+    "caller",
+    "colors"
+  ],
+  "author": "Constantin Titarenko",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/titarenko/mylog/issues"
+  },
+  "homepage": "https://github.com/titarenko/mylog",
+  "dependencies": {
+    "caller-id": "^0.1.0",
+    "colors": "^0.6.2"
+  }
+}
