@@ -33,7 +33,7 @@ Logs `arg` with level `debug` to `stdout`.
 
 Shuts down app on uncaught exception.
 
-## exitWhenMemoryLimitExceeded(limit)
+## exitWhenExceededMemoryLimit(limit)
 
 Shuts down app when it has consumed more than `limit` bytes.
 
