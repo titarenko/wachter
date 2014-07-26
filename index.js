@@ -1,55 +1,16 @@
 var _ = require('lodash');
 var callerId = require('caller-id');
 var colors = require('colors');
+var memwatch = require('memwatch');
 
-var bus = {
-	trigger: function () {
-	}
-};
-
-var config = {
-	pathPrefix: ''
-};
-
-var processName = require('path').dirname(require.main.filename).slice(config.pathPrefix.length || 0);
-var processId = process.pid;
-
-function appendNextPart (line, part) {
-	if (line != '' && part != '.' && part != '...') {
-		line += ' ' + part;
-	} else {
-		line += part;
-	}
-	return line;
-}
-
-function finalize (line) {
-	if (line[line.length - 1] != '.') {
-		line += '.';
-	}
-	return line;
-}
+var processName = process.title || process.argv[1];
 
 function stringifyArgs (args) {
-	var line = '';
-	
-	for (var i in args) {
-		var part = args[i];
-		if (_.isString(part)) {
-			line = appendNextPart(line, part);
-		} else {
-			line = appendNextPart(line, _.isObject(part)
-				? JSON.stringify(part, null, 4)
-				: part && part.toString()
-			);			
-		}
-	}
-
-	if (line != '') {
-		line = finalize(line);
-	}
-
-	return line;
+	return args.map(function (arg) {
+		return _.isObject(arg)
+			? JSON.stringify(arg, null, 4)
+			: arg && arg.toString();
+	}).join(' ');
 }
 
 function isErrorLevel (level) {
@@ -58,105 +19,80 @@ function isErrorLevel (level) {
 
 function getMessage (level, args, callerInfo) {
 	args = Array.prototype.slice.call(args);
-
 	if (_.isObject(args[args.length - 1])) {
 		var data = args.pop();
 	}
 	return {
 		time: new Date(),
-		file: callerInfo.filePath.slice(config.pathPrefix.length || 0),
-		line: callerInfo.lineNumber,
-		'function': callerInfo.functionName,
-		pid: processId,
+		origin: callerInfo,
 		process: processName,
 		level: level,
 		message: stringifyArgs(args),
-		data: isErrorLevel(level)
-			? data && data.stack || data
-			: data
+		data: isErrorLevel(level) && data && data.stack || data
 	};
 }
 
-function triggerMessage (level, args, callerInfo) {
-	var message = getMessage(level, args, callerInfo);
-	
-	bus.trigger('log:' + level, message);
-	
+function stringifyCallerInfo (info) {
+	return [
+		info.functionName,
+		':',
+		callerInfo.lineNumber,
+		'@',
+		callerInfo.filePath
+	].join('');
+}
+
+function buildMethod (level) {
 	var method = isErrorLevel(level) ? console.error : console.log;
-	var text = JSON.stringify(message, null, 4);
 	var color = isErrorLevel(level) ? 'red' : 'yellow';
 	
-	method.call(console, text[color]);
-	
-	return message;
+	return function () {
+		var callerInfo;
+		
+		try {
+			callerInfo = stringifyCallerInfo(callerId.getData());
+		} catch (error) {
+			callerInfo = null;
+		}
+
+		var message = getMessage(level, args, callerInfo);
+		var text = JSON.stringify(message, null, 4);
+		method.call(console, text[color]);
+	};
 }
 
-function getNullCallerInfo () {
-	return {
-		filePath: 'unknown',
-		lineNumber: 0,
-		functionName: 'unknown'
-	};
+function exit () {
+	// temporal failure, user is invited to restart
+	// (according to http://stackoverflow.com/a/1535733)
+	process.exit(75);
+}
+
+function exitWhenGotUncaughtException () {
+	process.on('uncaughtException', exit);
+}
+
+function exitWhenExceededMemoryLimit (limit) {
+	memwatch.on('stats', function (info) {
+		if (info.current_base > limit) {
+			methods.info('exceeded memory limit', info.current_base.toString(), '>', limit.toString());
+			exit();
+		}
+	});
 }
 
 var methods = {
-
-	alert: function () {
-		var callerInfo;
-		
-		try {
-			callerInfo = callerId.getData();
-		} catch (error) {
-			callerInfo = getNullCallerInfo();
-		}
-
-		var message = triggerMessage('alert', arguments, callerInfo);
-		
-		bus.trigger('system:alert', message);
-	},
-
-	error: function () {
-		var callerInfo;
-		
-		try {
-			callerInfo = callerId.getData();
-		} catch (error) {
-			callerInfo = getNullCallerInfo();
-		}
-		
-		triggerMessage('error', arguments, callerInfo);
-	},
-
-	info: function () {
-		var callerInfo;
-		
-		try {
-			callerInfo = callerId.getData();
-		} catch (error) {
-			callerInfo = getNullCallerInfo();
-		}
-		
-		triggerMessage('info', arguments, callerInfo);
-	},
-
-	debug: function () {
-		var callerInfo;
-		
-		try {
-			callerInfo = callerId.getData();
-		} catch (error) {
-			callerInfo = getNullCallerInfo();
-		}
-		
-		triggerMessage('debug', arguments, callerInfo);
-	}
-
+	alert: buildMethod('alert'),
+	error: buildMethod('error'),
+	info: buildMethod('info'),
+	debug: buildMethod('debug'),
+	exitWhenGotUncaughtException: exitWhenGotUncaughtException,
+	exitWhenExceededMemoryLimit: exitWhenExceededMemoryLimit
 };
 
 module.exports = methods;
 
 process.on('uncaughtException', function (error) {
-	methods.alert('Uncaught exception', error);
+	methods.alert('uncaught exception', error);
 });
 
-methods.info('Started');
+methods.info('started');

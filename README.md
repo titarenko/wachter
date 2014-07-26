@@ -1,34 +1,41 @@
-# Log
+# wachter
 
-Module for logging.
+Watchdog for your app. Provides API for logging and shutting down on certain condition.
 
 Features:
 
 * provides caller info (which function has called log method)
-* color console output
+* colored console output
 * logs uncaught exceptions (with `alert` level)
-* uses system bus (if provided)
+* provides methods to shut down app on uncaught exception or exceeding memory limit
 
 # API
 
 Notice: if argument (except error) is object, it will be `JSON.stringify`ed, otherwise, `toString`ed.
 
-## alert([arg, arg2, arg3, ...,] [error])
+## alert(arg, arg2, arg3, ..., error)
 
 Logs `arg` and error details (if any) with level `alert` (highest level) to `stderr`.
-Additionally raises event `system:alert` using system bus (if provided).
 
-## error([arg, arg2, arg3, ...,] [error])
+## error(arg, arg2, arg3, ..., error)
 
 Logs `arg` and error details (if any) with level `error` to `stderr`.
 
-## info([arg, arg2, arg3, ...,])
+## info(arg, arg2, arg3, ...)
 
 Logs `arg` with level `info` to `stdout`.
 
-## debug([arg, arg2, arg3, ...,])
+## debug(arg, arg2, arg3, ...)
 
 Logs `arg` with level `debug` to `stdout`.
+
+## exitWhenGotUncaughtException()
+
+Shuts down app on uncaught exception.
+
+## exitWhenMemoryLimitExceeded(limit)
+
+Shuts down app when it has consumed more than `limit` bytes.
 
 # License
 

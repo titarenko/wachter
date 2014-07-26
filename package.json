@@ -1,25 +1,26 @@
 {
-  "name": "mylog",
+  "name": "wachter",
   "version": "0.1.0",
-  "description": "My preferred way of logging, with caller info, colors and other stuff.",
+  "description": "Watchdog for your app. Provides API for logging and shutting down on certain condition.",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/titarenko/mylog.git"
+    "url": "git://github.com/titarenko/wachter.git"
   },
   "keywords": [
     "log",
-    "caller",
-    "colors"
+    "exit"
   ],
   "author": "Constantin Titarenko",
   "license": "BSD",
   "bugs": {
-    "url": "https://github.com/titarenko/mylog/issues"
+    "url": "https://github.com/titarenko/wachter/issues"
   },
-  "homepage": "https://github.com/titarenko/mylog",
+  "homepage": "https://github.com/titarenko/wachter",
   "dependencies": {
     "caller-id": "^0.1.0",
-    "colors": "^0.6.2"
+    "colors": "^0.6.2",
+    "lodash": "^2.4.1",
+    "memwatch": "^0.2.2"
   }
 }
