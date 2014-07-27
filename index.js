@@ -55,6 +55,7 @@ function buildMethod (level) {
 			callerInfo = null;
 		}
 
+		var args = Array.prototype.slice.call(arguments);
 		var message = getMessage(level, args, callerInfo);
 		var text = JSON.stringify(message, null, 4);
 		method.call(console, text[color]);
