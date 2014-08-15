@@ -87,7 +87,8 @@ var methods = {
 	info: buildMethod('info'),
 	debug: buildMethod('debug'),
 	exitWhenGotUncaughtException: exitWhenGotUncaughtException,
-	exitWhenExceededMemoryLimit: exitWhenExceededMemoryLimit
+	exitWhenExceededMemoryLimit: exitWhenExceededMemoryLimit,
+	exit: exit
 };
 
 module.exports = methods;

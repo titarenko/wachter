@@ -1,6 +1,6 @@
 {
   "name": "wachter",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Watchdog for your app. Provides API for logging and shutting down on certain condition.",
   "main": "index.js",
   "repository": {

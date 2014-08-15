@@ -37,6 +37,10 @@ Shuts down app on uncaught exception.
 
 Shuts down app when it has consumed more than `limit` bytes.
 
+## exit()
+
+Shuts down app (with code 75 which means 'temporal failure').
+
 # License
 
 BSD
